@@ -1,0 +1,569 @@
+{
+  "name": "EntregaFinal",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -864,
+        -128
+      ],
+      "id": "6da69329-4ff7-49b6-8d6c-31f932274ea2",
+      "name": "Telegram Trigger",
+      "webhookId": "8f1292f1-8069-429c-92eb-e84b53287f57",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "517ec82e-d166-41eb-a7fa-6ccf3937990c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4a0f7976-49f7-40de-a5a7-ee54e6287660",
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -624,
+        -128
+      ],
+      "id": "370b9146-7728-4c42-860d-26151a460de2",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -352,
+        32
+      ],
+      "id": "99eab052-576d-4afe-ab86-5fed55f1d506",
+      "name": "Get a file",
+      "webhookId": "3603b904-f09d-43b6-be49-8383f7162425",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        32
+      ],
+      "id": "33903ecb-df1f-4f81-959b-8ee76cf709ef",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        272
+      ],
+      "id": "a89fea81-1160-485c-b2fc-9201eb66b001",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fC34pFgA_0Zt2EMmGiOAcPLp_eFrVnB00CfDX7YZxVE",
+          "mode": "list",
+          "cachedResultName": "Stock concesionaria",
+          "cachedResultUrl": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Stock",
+          "cachedResultUrl": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        800,
+        272
+      ],
+      "id": "a407d6b0-3783-4355-b20f-37e2039429da",
+      "name": "Stock",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        48
+      ],
+      "id": "6c00c61c-71bb-4f5f-b66d-2728ea3981c5",
+      "name": "Send a text message",
+      "webhookId": "a39e4484-55d3-43cd-b76b-0d54e4b4a8d3",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Switch').item.json.message.from.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        272
+      ],
+      "id": "bcde775c-1747-420a-8b3a-b8d825b2c3ba",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Texto del usuario: {{ $('Telegram Trigger').item.json.message?.text || $('Transcribe a recording').item.json?.text }}\n\nClasificá el interés, categoria y modelo del cliente en una concesionaria.\n\nCategorías posibles:\n- Auto\n- Moto\n- Camioneta\n- Consulta_general\n\nSi el cliente no manifiesta la categoria, el interes y el modelo. Deja el valor del JSON vacio.\n\nRespondé SOLO en JSON:\n\n{\n \"categoria\": \"Auto | Moto | Camioneta | Consulta_general\",\n \"interes\": \"Alto | Medio | Bajo\"\n  \"modelo\": modelo de interes del cliente\n}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        -144
+      ],
+      "id": "d8acc55c-dfe6-403d-9738-55dc123b1611",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": ""
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Consulta del usuario: {{ $('Telegram Trigger').item.json.message?.text || $('Transcribe a recording').item.json?.text }}\n\n\n",
+        "options": {
+          "systemMessage": "=## ROL\nSos \"Enzo\", asesor comercial de Sunchales Motors AI 🇦🇷. Estás en Av. Independencia 450, Sunchales, Santa Fe. Tu objetivo es vender y que el cliente venga a la agencia.\n\n## TUS HERRAMIENTAS\n1. \"Google Sheets\": Información exacta de vehículos (Precio USD, KM, Año). Es tu única fuente de verdad.\n\n## REGLAS DE RESPUESTA\n1. ESTILO: Cordial, profesional y bien santafesino. Usá el \"voseo\" (vos/tenés/estás) y términos argentinos (decí \"agencia\" o \"salón\", nunca \"showroom\"). Sé breve y directo. 🏎️\n2. PRIORIDAD DE STOCK: Si preguntan por un modelo, SIEMPRE mirá el stock primero.\n   - Si está: Da el precio en USD y un detalle clave.\n   - Si NO está: Ofrecé lo más parecido que tengamos y decí que \"está por entrar\" algo nuevo.\n3. PERMUTAS: Si mencionan un usado, recordá que tomamos de 2015 en adelante. Deciles: \"Traelo a la agencia y lo peritamos en un toque\". 🚗🔄\n4. CIERRE: Terminá siempre con una pregunta para que el cliente mueva. \n   Ej: \"¿Te venís hoy a verlo?\" o \"¿Querés que te reserve un turno para probarlo?\". \n\n## MANEJO DE ENTRADAS\n- Texto o audio valen igual. Si el audio es un lío, decí: \"Che, no te entendí bien que buscabas, ¿me repetís?\".\n\n## RESTRICCIONES\n- PROHIBIDO inventar precios. Si no está en el Excel, decí que hablás con el dueño y pedile el WhatsApp. 📱\n\n## FORMATO\n- Usá negritas para destacar precios y modelos.\n- Usá emojis (🚗, 🛻, 🏍️, 💰,📍) de forma natural para que no sea un bloque de texto aburrido."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        544,
+        48
+      ],
+      "id": "2d183468-91fe-45b7-8401-2706539e967a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "let texto = $json.output[0].content[0].text;\n\n// limpiar markdown del modelo\ntexto = texto.replace(/```json/g, '')\n             .replace(/```/g, '')\n             .trim();\n\nconst clasificacion = JSON.parse(texto);\n\nreturn [\n  {\n    json: clasificacion\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        -304
+      ],
+      "id": "809fdbaf-03c1-4e82-88f8-321122de5177",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "60a408be-9f2f-46be-94b4-fac16f4f3c91",
+              "leftValue": "={{ $json.modelo }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        736,
+        -304
+      ],
+      "id": "2b7f7e44-3186-4c26-80f4-e9533c84da8e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1fC34pFgA_0Zt2EMmGiOAcPLp_eFrVnB00CfDX7YZxVE",
+          "mode": "list",
+          "cachedResultName": "Stock concesionaria",
+          "cachedResultUrl": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2024395056,
+          "mode": "list",
+          "cachedResultName": "Hoja 4",
+          "cachedResultUrl": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Cliente": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+            "Categoria": "={{ $json.categoria }}",
+            "Modelo": "={{ $json.modelo }}",
+            "Interes": "={{ $json.interes }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Cliente",
+              "displayName": "Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Categoria",
+              "displayName": "Categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Modelo",
+              "displayName": "Modelo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Interes",
+              "displayName": "Interes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        -432
+      ],
+      "id": "302c71f8-b905-46a6-a4da-25663b354e68",
+      "name": "Agregar cliente",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": ""
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stock": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Agregar cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "efb32523-8522-4342-92b6-4071cee04e98",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b3d30a6bfb0bfd2b25ae97d4d55f98c1fc2a0b5b4f3b1038d37ceee6f4b85401"
+  },
+  "id": "xNlcIQfVGdG5QxXf",
+  "tags": [
+    {
+      "updatedAt": "2026-01-29T23:22:42.690Z",
+      "createdAt": "2026-01-29T23:22:42.690Z",
+      "id": "nThvbQGblGWDZKEU",
+      "name": "CoderHouse"
+    }
+  ]
+}
