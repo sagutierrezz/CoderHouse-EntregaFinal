@@ -206,7 +206,7 @@ Después de ejecutar los Tests 2 y 3:
 | Archivo                             | Descripción                                           |
 | ----------------------------------- | ----------------------------------------------------- |
 | `EntregaFinal.json`                 | Workflow n8n                                          |
-| `SunchalesMotors_Documentacion.pdf` | Documentación técnica completa con diagramas          |
+| `Documentación Entrega final.pdf`   | Documentación técnica completa                        |
 | `prompts_LLM.txt`                   | Todos los prompts de los nodos LLM extraídos del JSON |
 | `README.md`                         | Este archivo — instrucciones de importación y pruebas |
 
